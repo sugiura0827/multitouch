@@ -2,29 +2,45 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>高感度マルチタッチ可視化</title>
+  <title>マルチタッチ可視化＋情報表示</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
-      background: #fff;
+      background: #ffffff;
       touch-action: none;
+      font-family: sans-serif;
     }
     canvas {
       display: block;
+    }
+    #info {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      pointer-events: none;
+      white-space: pre;
     }
   </style>
 </head>
 <body>
 <canvas id="touchCanvas"></canvas>
+<div id="info">Touch Info</div>
 
 <script>
   const canvas = document.getElementById('touchCanvas');
   const ctx = canvas.getContext('2d');
+  const infoDiv = document.getElementById('info');
 
-  // 画面サイズに合わせる
+  const activeTouches = new Map();
+
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -32,12 +48,11 @@
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
-  // タッチ位置を保存するマップ
-  const activeTouches = new Map();
-
-  // 毎フレーム描画
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let infoText = `Touch Points: ${activeTouches.size}\n`;
+
     for (const [id, pos] of activeTouches.entries()) {
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2);
@@ -46,12 +61,15 @@
       ctx.strokeStyle = 'rgba(0, 100, 255, 1)';
       ctx.lineWidth = 2;
       ctx.stroke();
+
+      infoText += `ID ${id}: (${Math.round(pos.x)}, ${Math.round(pos.y)})\n`;
     }
+
+    infoDiv.textContent = infoText.trim();
     requestAnimationFrame(draw);
   }
   draw();
 
-  // タッチイベント処理
   function updateTouches(e) {
     for (let i = 0; i < e.touches.length; i++) {
       const t = e.touches[i];
@@ -66,7 +84,6 @@
     }
   }
 
-  // イベント登録
   canvas.addEventListener('touchstart', e => {
     updateTouches(e);
     e.preventDefault();
