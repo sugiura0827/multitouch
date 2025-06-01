@@ -2,18 +2,18 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>マルチタッチ可視化</title>
+  <title>高感度マルチタッチ可視化</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
-      background: #f0f0f0;
+      background: #fff;
+      touch-action: none;
     }
     canvas {
       display: block;
-      touch-action: none; /* ジェスチャースクロール防止 */
     }
   </style>
 </head>
@@ -24,7 +24,7 @@
   const canvas = document.getElementById('touchCanvas');
   const ctx = canvas.getContext('2d');
 
-  // リサイズ対応
+  // 画面サイズに合わせる
   function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -32,38 +32,58 @@
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
-  // タッチを描画する関数
-  function drawTouches(touches) {
+  // タッチ位置を保存するマップ
+  const activeTouches = new Map();
+
+  // 毎フレーム描画
+  function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let i = 0; i < touches.length; i++) {
-      const t = touches[i];
+    for (const [id, pos] of activeTouches.entries()) {
       ctx.beginPath();
-      ctx.arc(t.clientX, t.clientY, 30, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(0, 150, 255, 0.5)`;
+      ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 150, 255, 0.6)';
       ctx.fill();
-      ctx.strokeStyle = 'blue';
+      ctx.strokeStyle = 'rgba(0, 100, 255, 1)';
+      ctx.lineWidth = 2;
       ctx.stroke();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  // タッチイベント処理
+  function updateTouches(e) {
+    for (let i = 0; i < e.touches.length; i++) {
+      const t = e.touches[i];
+      activeTouches.set(t.identifier, { x: t.clientX, y: t.clientY });
     }
   }
 
-  // イベントハンドラ
+  function removeTouches(e) {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const t = e.changedTouches[i];
+      activeTouches.delete(t.identifier);
+    }
+  }
+
+  // イベント登録
   canvas.addEventListener('touchstart', e => {
-    drawTouches(e.touches);
+    updateTouches(e);
     e.preventDefault();
   }, { passive: false });
 
   canvas.addEventListener('touchmove', e => {
-    drawTouches(e.touches);
+    updateTouches(e);
     e.preventDefault();
   }, { passive: false });
 
   canvas.addEventListener('touchend', e => {
-    drawTouches(e.touches);
+    removeTouches(e);
     e.preventDefault();
   }, { passive: false });
 
   canvas.addEventListener('touchcancel', e => {
-    drawTouches(e.touches);
+    removeTouches(e);
     e.preventDefault();
   }, { passive: false });
 </script>
