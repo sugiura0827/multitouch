@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>マルチタッチ可視化＋情報表示</title>
+  <title>マルチタッチ可視化＋情報表示（拡大）</title>
   <style>
     html, body {
       margin: 0;
@@ -55,11 +55,11 @@
 
     for (const [id, pos] of activeTouches.entries()) {
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, 35, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(0, 150, 255, 0.6)';
+      ctx.arc(pos.x, pos.y, 70, 0, Math.PI * 2); // ← サイズを2倍に
+      ctx.fillStyle = 'rgba(0, 150, 255, 0.5)';
       ctx.fill();
       ctx.strokeStyle = 'rgba(0, 100, 255, 1)';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 4;
       ctx.stroke();
 
       infoText += `ID ${id}: (${Math.round(pos.x)}, ${Math.round(pos.y)})\n`;
