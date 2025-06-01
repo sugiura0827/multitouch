@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>マルチタッチ可視化＋情報表示（拡大）</title>
+  <title>マルチタッチ可視化＋情報表示（拡大＆表示修正）</title>
   <style>
     html, body {
       margin: 0;
@@ -13,11 +13,13 @@
       touch-action: none;
       font-family: sans-serif;
     }
+
     canvas {
       display: block;
     }
+
     #info {
-      position: absolute;
+      position: fixed;
       top: 10px;
       right: 10px;
       background: rgba(0, 0, 0, 0.6);
@@ -27,6 +29,7 @@
       font-size: 14px;
       pointer-events: none;
       white-space: pre;
+      z-index: 1000;
     }
   </style>
 </head>
@@ -55,7 +58,7 @@
 
     for (const [id, pos] of activeTouches.entries()) {
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, 70, 0, Math.PI * 2); // ← サイズを2倍に
+      ctx.arc(pos.x, pos.y, 70, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(0, 150, 255, 0.5)';
       ctx.fill();
       ctx.strokeStyle = 'rgba(0, 100, 255, 1)';
