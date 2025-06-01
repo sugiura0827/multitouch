@@ -2,26 +2,45 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>マルチタッチ可視化（背景色変化）</title>
+  <title>マルチタッチ可視化＋座標表示</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
+      background: #ffffff;
       touch-action: none;
+      font-family: sans-serif;
     }
+
     canvas {
       display: block;
+    }
+
+    #info {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      pointer-events: none;
+      white-space: pre;
+      z-index: 9999;
     }
   </style>
 </head>
 <body>
 <canvas id="touchCanvas"></canvas>
+<div id="info">Touch Info</div>
 
 <script>
   const canvas = document.getElementById('touchCanvas');
   const ctx = canvas.getContext('2d');
+  const infoDiv = document.getElementById('info');
 
   const activeTouches = new Map();
 
@@ -32,24 +51,24 @@
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
 
-  function updateBackground() {
-    const bgColor = activeTouches.size > 0 ? '#ccf2ff' : '#ffffff';
-    document.body.style.backgroundColor = bgColor;
-  }
-
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (const [, pos] of activeTouches.entries()) {
+    let infoText = `Touch Points: ${activeTouches.size}\n`;
+
+    for (const [id, pos] of activeTouches.entries()) {
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, 70, 0, Math.PI * 2);
+      ctx.arc(pos.x, pos.y, 70, 0, Math.PI * 2); // 半径70pxの大きな円
       ctx.fillStyle = 'rgba(0, 150, 255, 0.5)';
       ctx.fill();
       ctx.strokeStyle = 'rgba(0, 100, 255, 1)';
       ctx.lineWidth = 4;
       ctx.stroke();
+
+      infoText += `ID ${id}: (${Math.round(pos.x)}, ${Math.round(pos.y)})\n`;
     }
 
+    infoDiv.textContent = infoText.trim();
     requestAnimationFrame(draw);
   }
   draw();
@@ -59,7 +78,6 @@
       const t = e.touches[i];
       activeTouches.set(t.identifier, { x: t.clientX, y: t.clientY });
     }
-    updateBackground();
   }
 
   function removeTouches(e) {
@@ -67,7 +85,6 @@
       const t = e.changedTouches[i];
       activeTouches.delete(t.identifier);
     }
-    updateBackground();
   }
 
   canvas.addEventListener('touchstart', e => {
